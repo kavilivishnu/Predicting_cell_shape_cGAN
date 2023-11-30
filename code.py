@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.optimizers import Adam
 import numpy as np
 import glob
 from PIL import Image
@@ -84,13 +85,15 @@ def build_discriminator(img_shape):
 # cGAN Model Construction
 generator = build_generator(noise_vector_for_generator)
 discriminator = build_discriminator(img_shape)
-discriminator.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+learning_rate = 0.0002
+optimizer = Adam(learning_rate=learning_rate)
+discriminator.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
 discriminator.trainable = False
 cgan_input = layers.Input(shape=(noise_vector_for_generator,))
 cgan_output = discriminator(generator(cgan_input))
 cgan = models.Model(cgan_input, cgan_output)
-cgan.compile(loss='binary_crossentropy', optimizer='adam')
+cgan.compile(loss='binary_crossentropy', optimizer=optimizer)
 
 # Training Function
 def train_cgan(generator, discriminator, cgan, epochs, batch_size, noise_vector_for_generator, image_files, conditioned_labels):
